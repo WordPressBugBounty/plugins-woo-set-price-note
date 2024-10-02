@@ -1,0 +1,1 @@
+# plugins-woo-set-price-note
