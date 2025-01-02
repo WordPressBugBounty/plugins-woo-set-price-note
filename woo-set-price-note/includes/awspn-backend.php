@@ -21,7 +21,9 @@ class Woo_Set_Price_Note_Backend {
 	 *
 	 * @return void
 	 */
-
+	public $id;
+    public $method_title;
+    public $method_description;
 
 	public function __construct() {
 		$this->id                 = 'Woo_Set_Price_Note_Backend';
