@@ -1,19 +1,19 @@
-=== Woo Set Price Note (Units, Offers, Editions) ===
+=== Set Price Note (Units, Offers, Editions) for WooCommerce ===
 Contributors: shivashankerbhatta
 Donate link: https://github.com/shshanker/woo-set-price-note
-Tags: Woo Set Price Note, woo-commerce, price, custom, addon, products
+Tags: custom, woocommerce, price, addon, products
 Requires at least: 3.0.0
-Tested up to: 6.7
-Stable tag: 2.0.3
+Tested up to: 6.8
+Stable tag: 2.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Woo Set Price Note (Units, Offers, Editions) – is the plugin that facilitate WooCommerce Shop-manager to display units/custom texts/messages with product price.
+Set Price Note (Units, Offers, Editions) for WooCommerce – is the plugin that facilitate WooCommerce Shop manager to display units/custom texts/messages with product price.
 
 
 == Description ==
 
-**Woo Set Price Note (Units, Offers, Editions)** – is the plugin that facilitate WooCommerce Shop-manager to display **units/custom texts/messages** with product price.
+**Set Price Note (Units, Offers, Editions) for WooCommerce ** – is the plugin that facilitate WooCommerce Shop-manager to display **units/custom texts/messages** with product price.
 
 
 ### The Plugin Features:
