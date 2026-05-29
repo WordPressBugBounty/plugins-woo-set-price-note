@@ -4,7 +4,7 @@ Donate link: https://github.com/shshanker/woo-set-price-note
 Tags: woocommerce, price, addon, products, labels
 Requires at least: 4.0
 Tested up to: 7.0
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 Requires PHP: 7.4
 WC requires at least: 8.0
 WC tested up to: 10.7.0

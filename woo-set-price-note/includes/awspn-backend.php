@@ -26,9 +26,9 @@ class Woo_Set_Price_Note_Backend {
     public $method_description;
 
 	public function __construct() {
-		$this->id                 = 'Woo_Set_Price_Note_Backend';
-		$this->method_title       = __( 'WooCommerce Set Price Note', 'woo-set-price-note' );
-		$this->method_description = __( 'WooCommerce Set Price Note', 'woo-set-price-note' );
+		// $this->id                 = 'Woo_Set_Price_Note_Backend';
+		// $this->method_title       = __( 'WooCommerce Set Price Note', 'woo-set-price-note' );
+		// $this->method_description = __( 'WooCommerce Set Price Note', 'woo-set-price-note' );
 
 	
 		// Actions
