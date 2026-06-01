@@ -1,319 +1,196 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
+if (!defined('ABSPATH')) exit;
 
 /**
- * Woo Set Price Note
- *
- * Allows user to get WooCommerce Set Price Note.
- *
- * @class   Woo_Set_Price_Note_Backend 
+ * Woo Set Price Note - Backend Product Meta Configuration Class
+ * Engineered with smooth transitions, interactive conditional visibility, and explicit 
+ * architectural cross-linking back to the central plugin dashboard ecosystem.
  */
-
-
 class Woo_Set_Price_Note_Backend {
 
-	/**
-	 * Init and hook in the integration.
-	 *
-	 * @return void
-	 */
-	public $id;
-    public $method_title;
-    public $method_description;
+    /**
+     * Bind administrative hooks to the native WooCommerce lifecycle.
+     */
+    public function __construct() {
+        add_action('woocommerce_product_options_general_product_data', [$this, 'render_admin_trigger']);
+        add_action('woocommerce_process_product_meta', [$this, 'save_product_meta']);
+        add_filter('woocommerce_product_data_tabs', [$this, 'add_product_data_tab'], 0);
+        add_action('woocommerce_product_data_panels', [$this, 'render_product_data_panel']);
+        add_action('admin_footer', [$this, 'inject_admin_scripts']);
+    }
 
-	public function __construct() {
-		// $this->id                 = 'Woo_Set_Price_Note_Backend';
-		// $this->method_title       = __( 'WooCommerce Set Price Note', 'woo-set-price-note' );
-		// $this->method_description = __( 'WooCommerce Set Price Note', 'woo-set-price-note' );
+    /**
+     * Register the dedicated custom meta panel tab on the WooCommerce data meta box structure.
+     * Restricts presentation dynamically using native standard product classification keys.
+     *
+     * @param array $tabs Registered admin dashboard core product panel tabs data structures.
+     * @return array
+     */
+    public function add_product_data_tab($tabs) {
+        $tabs['awspn-woo-price-note'] = [
+            'label'  => __('Price Note', 'woo-set-price-note'),
+            'target' => 'awspn_product_data_panel',
+            'class'  => ['show_if_simple', 'show_if_grouped', 'show_if_external', 'show_if_subscription', 'show_if_bundle'],
+        ];
+        return $tabs;
+    }
 
-	
-		// Actions
-		// Display Fields
-		add_action( 'woocommerce_product_options_general_product_data', array( $this, 'awspn_add_custom_general_field') );	
-		
-		// Save Fields
-		add_action( 'woocommerce_process_product_meta', array( $this, 'awspn_add_custom_general_field_save') );	
+    /**
+     * Render the high-fidelity settings panel container displaying granular single-product parameters.
+     * Extends control rows with explicit cross-links returning users to the central global settings ecosystem.
+     */
+    public function render_product_data_panel() {
+        global $post;
+        $product = wc_get_product($post->ID);
+        $global  = Woo_Set_Price_Note_Admin::get_default_settings();
+        $stored  = get_option('awspn_global_settings', []);
+        $opts    = array_merge($global, $stored);
 
-		// First Register the Tab by hooking into the 'woocommerce_product_data_tabs' filter
-		add_filter( 'woocommerce_product_data_tabs', array($this, 'awspn_add_price_note_product_data_tab'), 100 );	
-		// functions you can call to output text boxes, select boxes, etc.
-		
-		
-		add_filter( 'woocommerce_product_data_panels', array($this,'add_my_custom_product_data_fields') ); // WC 2.6 and up
+        // Generate absolute admin URI back to central settings framework
+        $global_settings_url = admin_url('admin.php?page=awspn-settings');
 
-		// Load small styling
-		add_action('admin_footer', array( $this, 'awspn_print_price_note_style'));
+        echo '<div id="awspn_product_data_panel" class="panel woocommerce_options_panel hidden">';
+        wp_nonce_field('save_awspn_meta', 'awspn_nonce');
 
-		//load price note toggle scripts for order and emails
-		add_action('admin_enqueue_scripts', array( $this, 'awspn_enqueue_backend_scripts'));
-	}
+        // Layout Inline CSS adjustments targeting custom markup elements inside standard elements
+        echo '<style>
+            .awspn-meta-header-box { display: flex; justify-content: space-between; align-items: center; background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 16px 20px; margin-bottom: 12px; }
+            .awspn-meta-header-box h3 { margin: 0; font-size: 14px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+            .awspn-meta-global-link { font-size: 13px; font-weight: 600; color: #2563eb; text-decoration: none !important; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px solid #bfdbfe; border-radius: 4px; background: #eff6ff; transition: all 0.15s ease-in-out; }
+            .awspn-meta-global-link:hover { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+            .awspn-meta-global-link .dashicons { font-size: 16px; width: 16px; height: 16px; line-height: 1.2; }
+            .awspn-price-note-preview-wrapper { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 16px; margin: 12px 20px 20px 162px; box-sizing: border-box; }
+            .awspn-price-note-preview-wrapper p.form-field { margin-left: 0 !important; padding-left: 0 !important; }
+            .awspn-price-note-preview-wrapper p.form-field label { width: 135px !important; margin-left: 0 !important; }
+            @media (max-width: 782px) {
+                .awspn-price-note-preview-wrapper { margin: 12px 10px; padding: 12px; }
+                .awspn-price-note-preview-wrapper p.form-field label { width: 100% !important; }
+            }
+        </style>';
 
-	public function awspn_add_price_note_product_data_tab( $original_tabs ) {
-			$new_tab['awspn-woo-price-note'] = array(
-					'label' => __( 'Price Note', 'woo-set-price-note' ),
-					'target' => 'my_custom_product_data',
-				);
+        // Top Panel Contextual Ribbon Bar containing cross-linking components
+        echo '<div class="awspn-meta-header-box">';
+        echo '<h3><span class="dashicons dashicons-tag"></span>' . __('Individual Product Price Note Settings', 'woo-set-price-note') . '</h3>';
+        echo '<a href="' . esc_url($global_settings_url) . '" class="awspn-meta-global-link" target="_blank">';
+        echo '<span class="dashicons dashicons-admin-generic"></span>' . __('Global Settings &rarr;', 'woo-set-price-note') . '</a>';
+        echo '</div>';
 
-			$insert_at_position = 1; // This can be changed
-			$tabs = array_slice( $original_tabs, 0, $insert_at_position, true ); // First part of original tabs
-			$tabs = array_merge( $tabs, $new_tab ); // Add new
-			$tabs = array_merge( $tabs, array_slice( $original_tabs, $insert_at_position, null, true ) ); // Glue the second part of original
+        // Block Group One: Core Localization Controls 
+        echo '<div class="options_group">';
+        woocommerce_wp_text_input([
+            'id'          => 'awspn_product_price_note_separator', 
+            'label'       => __('Separator', 'woo-set-price-note'), 
+            'placeholder' => $opts['separator'] ?? '/'
+        ]);
+        woocommerce_wp_text_input([
+            'id'          => 'awspn_product_price_note', 
+            'label'       => __('Price Note', 'woo-set-price-note'), 
+            'placeholder' => $opts['note_text'] ?? ''
+        ]);
+        echo '</div>';
 
-			return $tabs;
-	}
+        // Block Group Two: Transactional Order Document Injections
+        echo '<div class="options_group">';
+        woocommerce_wp_checkbox([
+            'id'    => 'awspn_show_on_order_and_email', 
+            'label' => __('Include on Order/Emails', 'woo-set-price-note')
+        ]);
 
-	
-	public function add_my_custom_product_data_fields() {
-	
-	global $post;
-	
-	// Note the 'id' attribute needs to match the 'target' parameter set above
-	echo '<div id="my_custom_product_data" class="panel woocommerce_options_panel">';
-		echo '<div class="options_group">';
+        $is_checked = get_post_meta($post->ID, 'awspn_show_on_order_and_email', true);
+        
+        // Contextually bounded container holding isolated conditional child controls
+        echo '<div class="awspn-price-note-preview-wrapper" style="display:' . ($is_checked === 'yes' ? 'block' : 'none') . ';">';
+        woocommerce_wp_checkbox([
+            'id'    => 'awspn_excl_price_on_order_and_email', 
+            'label' => __('Exclude Price', 'woo-set-price-note')
+        ]);
+        woocommerce_wp_checkbox([
+            'id'    => 'awspn_excl_sep_on_order_and_email', 
+            'label' => __('Exclude Separator', 'woo-set-price-note')
+        ]);
+        woocommerce_wp_text_input([
+            'id'    => 'awspn_product_price_note_oe_label', 
+            'label' => __('Custom Label', 'woo-set-price-note')
+        ]);
+        woocommerce_wp_text_input([
+            'id'    => 'awspn_product_price_note_oe_texts', 
+            'label' => __('Custom Texts', 'woo-set-price-note')
+        ]);
+        echo '</div></div></div>';
+    }
 
-			// Product per note separator 
-			woocommerce_wp_text_input( 
-				array( 
-					'id'          => 'awspn_product_price_note_separator', 
-					'label'       => __( 'Note Separator', 'woo-set-price-note' ), 
-					'placeholder' => '/',
-					'desc_tip'    => 'true',
-					'description' => __( 'Enter separator between price and note, like, "/", "-", "per", etc', 'woo-set-price-note' ) 
-				)
-			);
+    /**
+     * Provide rapid-access navigational trigger shortcuts in general product panels.
+     */
+    public function render_admin_trigger() {
+        echo '<div class="options_group" style="padding: 10px 20px; border-top: 1px solid #eee;">';
+        echo '<button type="button" class="button button-secondary" id="awspn-open-panel" style="display:inline-flex; align-items:center; gap:4px;">';
+        echo '<span class="dashicons dashicons-tag" style="font-size:16px; width:16px; height:16px; line-height:1.3;"></span>' . __('Configure Price Note', 'woo-set-price-note') . '</button>';
+        echo '</div>';
+    }
 
+    /**
+     * Inject DOM manipulation event routines safely into admin footer layouts.
+     */
+    public function inject_admin_scripts() {
+        global $pagenow, $post_type;
+        if (!in_array($pagenow, ['post.php', 'post-new.php']) || $post_type !== 'product') return;
+        ?>
+        <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                // Smooth conditional drawer toggling for visibility control sets
+                $('#awspn_show_on_order_and_email').on('change', function() {
+                    var $wrapper = $('.awspn-price-note-preview-wrapper');
+                    if ($(this).is(':checked')) {
+                        $wrapper.slideDown(180);
+                    } else {
+                        $wrapper.slideUp(180);
+                    }
+                });
 
-			// Product per note text
-			woocommerce_wp_text_input( 
-				array( 
-					'id'          => 'awspn_product_price_note', 
-					'label'       => __( 'Price Note', 'woo-set-price-note' ), 
-					'placeholder' => 'Piece',
-					'desc_tip'    => 'true',
-					'description' => __( 'Enter price note that you want to display with product price, like, Units, Offers, Editions, etc.', 'woo-set-price-note' ) 
-				)
-			);
+                // Focus routing script map to shift focus to designated custom panels instantly
+                $('#awspn-open-panel').on('click', function(e) {
+                    e.preventDefault();
+                    $('.wc-tabs a[href="#awspn_product_data_panel"]').click();
+                    $('html, body').animate({
+                        scrollTop: $('#woocommerce-product-data').offset().top - 40
+                    }, 200);
+                });
+            });
+        </script>
+        <?php
+    }
 
-	  	echo '</div>';
-	  	echo '<div class=" options_group ">';
+    /**
+     * Securely intercept, sanitize, validate and synchronize input values inside DB structures.
+     *
+     * @param int $post_id Standard numeric identification string mapping to processed inventory row entries.
+     */
+    public function save_product_meta($post_id) {
+        if (!isset($_POST['awspn_nonce']) || !wp_verify_nonce($_POST['awspn_nonce'], 'save_awspn_meta')) return;
 
-			// Show on Order and Emails
-			woocommerce_wp_checkbox( 
-				array( 
-					'id'          => 'awspn_show_on_order_and_email', 
-					'label'       => __( 'Also include price note on Order and Emails', 'woo-set-price-note' ), 
-					'placeholder' => 'Piece',
-					'desc_tip'    => 'true',
-					'description' => __( 'Check if you want to include the price note on Order details and Emails also.', 'woo-set-price-note' ) 
-				)
-			);	
+        // Process standard string matrices
+        $fields = [
+            'awspn_product_price_note', 
+            'awspn_product_price_note_separator', 
+            'awspn_product_price_note_oe_label', 
+            'awspn_product_price_note_oe_texts'
+        ];
+        foreach ($fields as $f) {
+            if (isset($_POST[$f])) {
+                update_post_meta($post_id, $f, sanitize_text_field($_POST[$f]));
+            }
+        }
 
-	  		$awspn_show_on_oe = get_post_meta( $post->ID, 'awspn_show_on_order_and_email', true );
-	  		$oe_box_class = !empty($awspn_show_on_oe) ? 'show' : 'hide';
-
-	  		echo '<div class="awspn-price-note-preview awspn_show_on_order_and_email_box '.$oe_box_class.'">';
-	  		if(isset($post)){
-	  			$_product = new WC_Product( $post->ID );
-				$product_price = $_product->get_price();
-				$product_price = wc_price($product_price);
-
-				$awspn_separator = esc_attr( get_post_meta( $post->ID, 'awspn_product_price_note_separator', true ) );
-				$awspn_separator = !empty($awspn_separator) ? $awspn_separator : '/';
-
-				$awspn_text = esc_attr( get_post_meta( $post->ID, 'awspn_product_price_note', true ) ); 
-				$awspn_text = !empty($awspn_text) ? $awspn_text : 'Piece';
-
-
-				$awspn_excl_price_on_oe = esc_attr( get_post_meta( $post->ID, 'awspn_excl_price_on_order_and_email', true ) );
-				$oe_price_class 		= empty($awspn_excl_price_on_oe) ? 'show' : 'hide';
-
-				$awspn_excl_sep_on_oe	= esc_attr( get_post_meta( $post->ID, 'awspn_excl_sep_on_order_and_email', true ) );
-				$oe_sep_class 			= empty($awspn_excl_sep_on_oe) ? 'show' : 'hide';
-
-				$awspn_clabel	= esc_attr( get_post_meta( $post->ID, 'awspn_product_price_note_oe_label', true ) );
-				$awspn_clabel 	= !empty($awspn_clabel) ? $awspn_clabel : 'Price note';
-
-				$awspn_ctexts 	= esc_attr( get_post_meta( $post->ID, 'awspn_product_price_note_oe_texts', true ) );
-				$awspn_ctexts 	= !empty($awspn_ctexts) ? $awspn_ctexts : $awspn_text;
-
-				
-				echo '<table class="awspn-table">';
-					echo '<thead>';
-					echo '<tr class="awspn-table__line-item">';
-						echo '<td>';
-							echo '<strong>'.__('Preview - Order details and Emails', 'woo-set-price-note').'</strong>';
-						echo '</td>';
-					echo '</tr>';				
-					echo '</thead>';				
-					echo '<tbody>';				
-					echo '<tr class="awspn-table__line-item order_item">';
-						echo '<td class="awspn-table__product-name">';
-						echo '<a href="'.get_permalink($post->ID).'">Flying Ninja</a> <strong class="product-quantity">× 1</strong>';
-						echo '<ul class="wc-item-meta">';
-							echo '<li>';
-								echo '<strong class="awspn-label-wrap"><span class="awspn-oe-label">'.$awspn_clabel.'</span>:</strong>';
-								echo '<p>';
-									echo '<span class="awspn-oe-price '.$oe_price_class.'">'.$product_price.'&nbsp;</span>';
-									echo '<span class="awspn-oe-sep '.$oe_sep_class.'">'.$awspn_separator.'&nbsp;</span>';
-								echo '<span class="awspn-oe-texts">'.$awspn_ctexts.'</span>';
-								echo '</p>';
-							echo '</li>';							
-						echo '</ul>';
-					echo "</td>";
-					echo "</tr>";
-					echo "</tbody>";
-				echo "</table>";
-				
-				// Show on Order and Emails
-				woocommerce_wp_checkbox( 
-					array( 
-						'id'          => 'awspn_excl_price_on_order_and_email', 
-						'label'       => __( 'Exclude price', 'woo-set-price-note' ), 
-						'placeholder' => 'Piece',
-						'desc_tip'    => 'true',
-						'description' => __( 'Check if you want to remove "price" from the price note for Order details and Emails.', 'woo-set-price-note' ) 
-					)
-				);
-
-				// Show on Order and Emails
-				woocommerce_wp_checkbox( 
-					array( 
-						'id'          => 'awspn_excl_sep_on_order_and_email', 
-						'label'       => __( 'Exclude separator', 'woo-set-price-note' ), 
-						'placeholder' => 'Piece',
-						'desc_tip'    => 'true',
-						'description' => __( 'Check if you want to remove "separator" from the price note for Order details and Emails.', 'woo-set-price-note' ) 
-					)
-				);
-
-				// Product per note text
-				woocommerce_wp_text_input( 
-					array( 
-						'id'          => 'awspn_product_price_note_oe_label', 
-						'label'       => __( 'Custom Label', 'woo-set-price-note' ), 
-						'placeholder' => 'Price note:',
-						'desc_tip'    => 'true',
-						'description' => __( 'Enter price note that you want to display with product price, like, Offer, Unit, Edition, etc.', 'woo-set-price-note' ) 
-					)
-				);
-
-				// Product per note text
-				woocommerce_wp_text_input( 
-					array( 
-						'id'          => 'awspn_product_price_note_oe_texts', 
-						'label'       => __( 'Custom Texts', 'woo-set-price-note' ), 
-						'placeholder' => 'Price texts',
-						'desc_tip'    => 'true',
-						'description' => __( 'Enter price note that you want to display with product price, like, Offer, Unit, Edition, etc.', 'woo-set-price-note' ) 
-					)
-				);
-
-	  		}
-	  		echo '</div>';
-	  	echo '</div>';
-	 echo '</div>';
-
-	
+        // Standardize conditional tracking checkboxes to strict binary schemas (yes/no states)
+        $checkboxes = [
+            'awspn_show_on_order_and_email', 
+            'awspn_excl_price_on_order_and_email', 
+            'awspn_excl_sep_on_order_and_email'
+        ];
+        foreach ($checkboxes as $cb) {
+            update_post_meta($post_id, $cb, isset($_POST[$cb]) ? 'yes' : 'no');
+        }
+    }
 }
-
-	
-
-	
-	/**
-	 * Adding price note options on WooCommerce single product general section.
-	 *
-	 * @return void
-	 */
-
-	public static function awspn_add_custom_general_field() {
-	 
-	  
-	  echo '<div class="options_group">';
-		  echo '<p class="awspn-open-panel-wapper">';
-		  	echo '<a href="javascript:void(0);" id="awspn-open-panel">'.__('Set Price Note', 'woo-set-price-note').'</a>';
-		  echo '</p>';	  
-	  echo '</div>';
-		
-	}
-
-
-	/**
-	 * Saving price note options on WooCommerce single product general section.
-	 *
-	 * @return void
-	 */
-
-	public static function awspn_add_custom_general_field_save( $post_id ){		
-		
-		$awspn_text 		= sanitize_text_field($_POST['awspn_product_price_note']);
-		$awspn_separator 	= sanitize_text_field($_POST['awspn_product_price_note_separator']);		
-
-		$awspn_show_on_oe		= sanitize_text_field($_POST['awspn_show_on_order_and_email']);
-		$awspn_excl_price_on_oe = sanitize_text_field($_POST['awspn_excl_price_on_order_and_email']);
-		$awspn_excl_sep_on_oe	= sanitize_text_field($_POST['awspn_excl_sep_on_order_and_email']);
-		$awspn_clabel			= sanitize_text_field($_POST['awspn_product_price_note_oe_label']);
-		$awspn_ctexts 			= sanitize_text_field($_POST['awspn_product_price_note_oe_texts']);
-
-		// Product per note text
-		if( isset( $awspn_text ) ){
-			update_post_meta( $post_id, 'awspn_product_price_note',  $awspn_text  );		
-		}
-
-		// Product per note separator
-		if( isset( $awspn_separator )  ){
-			update_post_meta( $post_id, 'awspn_product_price_note_separator',  $awspn_separator  );		
-		}
-
-		// Product per note separator
-		if( isset( $awspn_show_on_oe )  ){
-			update_post_meta( $post_id, 'awspn_show_on_order_and_email',  $awspn_show_on_oe  );		
-		}
-
-		// Product per note separator
-		if( isset( $awspn_excl_price_on_oe )  ){
-			update_post_meta( $post_id, 'awspn_excl_price_on_order_and_email',  $awspn_excl_price_on_oe  );		
-		}
-
-		// Product per note separator
-		if( isset( $awspn_excl_sep_on_oe )  ){
-			update_post_meta( $post_id, 'awspn_excl_sep_on_order_and_email',  $awspn_excl_sep_on_oe  );		
-		}
-
-		// Product per note separator
-		if( isset( $awspn_clabel )  ){
-			update_post_meta( $post_id, 'awspn_product_price_note_oe_label',  $awspn_clabel  );		
-		}
-
-		// Product per note separator
-		if( isset( $awspn_ctexts )  ){
-			update_post_meta( $post_id, 'awspn_product_price_note_oe_texts',  $awspn_ctexts  );		
-		}
-		
-	}
-
-	public function awspn_print_price_note_style(){
-			echo "<style type='text/css'>";
-				echo '.awspn_show_on_order_and_email_box.hide{display:none;}';
-				echo '.awspn-oe-price.hide{display:none;}';
-				echo '.awspn-oe-sep.hide{display:none;}';
-				echo '.awspn-table{ width:100%; padding:10px;}';
-				echo '.awspn-table tbody{background-color:#eee;}';
-				echo '.awspn-table tbody td{padding:20px 10px;}';
-				echo '.awspn-table tbody td ul{margin:0;}';
-				echo '.awspn-table tbody td li strong{float:left;}';
-				echo '.awspn-table tbody td li p{width:50%; float:left; margin:0; padding:0px 5px; line-height: inherit;}';		
-			echo '</style>';
-		}	
-
-	public function awspn_enqueue_backend_scripts(){
-		wp_register_script( 'awspn-backend-scripts', plugins_url( 'woo-set-price-note/assets/js/awspn-backend-scripts.js' ), array('jquery'), null, true );
-		wp_enqueue_script( 'awspn-backend-scripts' );
-	}	
-
-}
-
-$awspn_backend = new Woo_Set_Price_Note_Backend();
+new Woo_Set_Price_Note_Backend();
