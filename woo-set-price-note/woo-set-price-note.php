@@ -3,7 +3,7 @@
  * Plugin Name:       Set Price Note (Units, Offers, Editions) for WooCommerce
  * Plugin URI:        https://github.com/shshanker/woo-set-price-note
  * Description:       Clarify your pricing. Boost customer confidence and reduce support queries by adding custom units, offer details, or edition labels directly to your product prices.
- * Version:           3.0.0
+ * Version:           3.0.2
  * Author:            Shiva Shanker Bhatta
  * Author URI:        https://github.com/shshanker
  * Text Domain:       woo-set-price-note
@@ -17,7 +17,7 @@ if (!class_exists('Woo_Set_Price_Note')) :
 
     class Woo_Set_Price_Note
     {
-        const VERSION = '3.0.0';
+        const VERSION = '3.0.2';
         protected static $instance = null;
 
         public function __construct()

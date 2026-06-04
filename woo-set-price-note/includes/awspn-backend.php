@@ -42,7 +42,9 @@ class Woo_Set_Price_Note_Backend {
     public function render_product_data_panel() {
         global $post;
         $product = wc_get_product($post->ID);
-        $global  = Woo_Set_Price_Note_Admin::get_default_settings();
+        $global = class_exists( 'Woo_Set_Price_Note_Admin' ) 
+            ? Woo_Set_Price_Note_Admin::get_default_settings() 
+            : [ 'separator' => '/' ];
         $stored  = get_option('awspn_global_settings', []);
         $opts    = array_merge($global, $stored);
 

@@ -1,10 +1,10 @@
 === Set Price Note (Units, Offers, Editions) for WooCommerce ===
 Contributors: shivashankerbhatta, afthemes
 Donate link: https://github.com/shshanker/woo-set-price-note
-Tags: woocommerce, price suffix, price label, wholesale price, unit pricing
-Requires at least: 6.0
+Tags: suffix, label, unit, woocommerce, wholesale
+Requires at least: 5.0
 Tested up to: 7.0.0
-Stable tag: 3.0.0
+Stable tag: 3.0.2
 Requires PHP: 7.4
 WC requires at least: 8.5
 WC tested up to: 10.8.1
